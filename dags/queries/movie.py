@@ -1,9 +1,9 @@
+from queries.base import BaseQuery
 from queries.settings import DB_SETTINGS
 
 
-class MovieQuery:
-
-    query = f"""
+class MovieQuery(BaseQuery):
+    _query = f"""
         SELECT film.id, film.rating as imdb_rating, film.title, film.description,
         ARRAY_AGG(DISTINCT genre.name) as genre,
         ARRAY_AGG(DISTINCT person.full_name) FILTER (WHERE person_film.role = 'director') as director,
@@ -25,3 +25,6 @@ class MovieQuery:
         GROUP BY film.id
         ORDER BY modified
         """
+
+    def query(self):
+        return self._query

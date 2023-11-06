@@ -1,5 +1,6 @@
-from base import EntityMixinES
-from typing import Optional, List
+from typing import List, Optional
+
+from models.base import EntityMixinES
 
 
 class FilmParticipantES(EntityMixinES):

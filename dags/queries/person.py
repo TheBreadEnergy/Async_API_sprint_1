@@ -1,8 +1,9 @@
+from queries.base import BaseQuery
 from queries.settings import DB_SETTINGS
 
 
-class PersonQuery:
-    query = f"""
+class PersonQuery(BaseQuery):
+    _query = f"""
     SELECT person.id, person.full_name AS name, person.gender AS gender,
     ARRAY_AGG(
     DISTINCT jsonb_build_object('id', film.id, 'title', film.title, 'role': person_film.role)) AS film_roles,
@@ -14,3 +15,6 @@ class PersonQuery:
     GROUP BY person.id
     ORDER BY modified
     """
+
+    def query(self):
+        return self._query
