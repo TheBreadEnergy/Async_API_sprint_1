@@ -507,6 +507,5 @@ fabric.properties
 .env.api
 .env.database
 app/.idea
-app/config/.env.dev
 data/storage/
 
