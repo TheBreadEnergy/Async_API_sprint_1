@@ -6,9 +6,9 @@ services:
     volumes:
       - static:/opt/app/static
     depends_on:
-      - postgres
+      - postgres-db
     env_file:
-      - settings/.env.api
+      - envs/.env.api
     expose:
       - "8000"
 
@@ -26,10 +26,10 @@ services:
   postgres-db:
     image: postgres:latest
     volumes:
-      - ./data/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres-data:/var/lib/postgresql/data
     env_file:
-      - settings/.env.database
+      - envs/.env.database
 
   redis:
     image: redis:latest

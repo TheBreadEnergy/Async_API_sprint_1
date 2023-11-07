@@ -28,13 +28,20 @@ def fetch_wrapper(query_class: BaseQuery, state_key: str):
             )
             # TODO: logging
             cursor.execute(query_class.query(), (last_updated,))
-            while items := cursor.fetchmany(APP_SETTINGS.batch_size):
-                json_data = json.dumps([dict(x) for x in items], indent=4)
-                ti.xcom_push(
-                    key=state_key,
-                    value=str(items[-1]["modified"]),
-                )
-                yield json_data
+            items = cursor.fetchall()
+            print(items)
+            ti.xcom_push(
+                key=state_key,
+                value=str(items[-1]["modified"]),
+            )
+            # while items := cursor.fetchmany(APP_SETTINGS.batch_size):
+            #     json_data = json.dumps([dict(x) for x in items], indent=4)
+            #     ti.xcom_push(
+            #         key=state_key,
+            #         value=str(items[-1]["modified"]),
+            #     )
+            #     yield json_data
+            return json.dumps(items)
 
     return fetch
 

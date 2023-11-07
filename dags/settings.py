@@ -4,7 +4,7 @@ from queries.settings import EnvironmentBaseSettings
 
 class ApplicationSettings(EnvironmentBaseSettings):
     postgres_connection_id: str = Field(
-        "postgres_connection",
+        "postgres",
         alias="POSTGRES_CONNECTION_ID",
         env="POSTGRES_CONNECTION_ID",
     )
