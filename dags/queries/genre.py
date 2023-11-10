@@ -1,11 +1,11 @@
 from queries.base import BaseQuery
-from queries.settings import DB_SETTINGS
+from queries.settings import GENRE_TABLE
 
 
 class GenreQuery(BaseQuery):
     _query = f"""
     SELECT genre.id, genre.name as title, genre.description, genre.modified as modified
-    FROM {DB_SETTINGS.genre_table} as genre
+    FROM {GENRE_TABLE} genre
     WHERE genre.modified > %s
     GROUP BY genre.id
     ORDER BY modified

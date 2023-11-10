@@ -4,5 +4,5 @@ from models.base import EntityMixinES
 
 
 class GenreES(EntityMixinES):
-    name: str
+    title: str
     description: Optional[str] = None

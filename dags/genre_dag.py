@@ -1,33 +1,27 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from airflow.decorators import dag
-from airflow.operators.python import PythonOperator
 from models.genre_es import GenreES
 from queries.genre import GenreQuery
-from wrappers import fetch_wrapper, load_wrapper, transform_wrapper
-
 from settings import APP_SETTINGS
+from wrappers import fetch_wrapper, load_wrapper, transform_wrapper
 
 # TODO: write as closures, remove repeatance
 
 
-@dag(dag_id=APP_SETTINGS.genre_dag, start_date=datetime.min, catchup=False)
+@dag(
+    dag_id=APP_SETTINGS.genre_dag,
+    start_date=datetime.min,
+    schedule=timedelta(APP_SETTINGS.interval),
+    catchup=False,
+)
 def genre_dag():
-    fetch_operator = PythonOperator(
-        task_id="fetch",
-        python_callable=fetch_wrapper(GenreQuery, APP_SETTINGS.genre_state_key),
-        do_xcom_push=True,
-    )
-    transfom_operator = PythonOperator(
-        task_id="transform",
-        python_callable=transform_wrapper(GenreES),
-        do_xcom_push=True,
-    )
-    load_operator = PythonOperator(
-        task_id="load", python_callable=load_wrapper(APP_SETTINGS.es_genre_index)
-    )
-
-    fetch_operator >> transfom_operator >> load_operator
+    fetch_genre_task = fetch_wrapper(GenreQuery().query(), APP_SETTINGS.genre_state_key)
+    transform_genre_task = transform_wrapper(GenreES)
+    load_genre_task = load_wrapper(APP_SETTINGS.es_genre_index)
+    generator = fetch_genre_task()
+    generator = transform_genre_task(generator)
+    load_genre_task(generator)
 
 
 dag = genre_dag()

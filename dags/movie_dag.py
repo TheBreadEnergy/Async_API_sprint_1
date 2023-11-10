@@ -1,12 +1,10 @@
 from datetime import datetime, timedelta
 
 from airflow.models import DAG
-from airflow.operators.python import PythonOperator
 from models.movie_es import MovieES
 from queries.movie import MovieQuery
-from wrappers import fetch_wrapper, load_wrapper, transform_wrapper
-
 from settings import APP_SETTINGS
+from wrappers import fetch_batch_wrapper, load_wrapper, transform_wrapper
 
 with DAG(
     dag_id=APP_SETTINGS.movie_dag,
@@ -14,20 +12,11 @@ with DAG(
     start_date=datetime.min,
     catchup=False,
 ) as dag:
-    task_fetch_movies = PythonOperator(
-        task_id="fetch",
-        python_callable=fetch_wrapper(MovieQuery, APP_SETTINGS.movie_state_key),
-        do_xcom_push=True,
+    fetch_movies_task = fetch_batch_wrapper(
+        MovieQuery().query(), APP_SETTINGS.movie_state_key
     )
-    task_transform_movies = PythonOperator(
-        task_id="transform",
-        python_callable=transform_wrapper(MovieES),
-        do_xcom_push=True,
-    )
-    task_load_movies = PythonOperator(
-        task_id="load",
-        python_callable=load_wrapper(APP_SETTINGS.es_movies_index),
-        do_xcom_push=True,
-    )
-
-    task_fetch_movies >> task_transform_movies >> task_load_movies
+    transform_movies_task = transform_wrapper(MovieES)
+    load_movies_task = load_wrapper(APP_SETTINGS.es_movies_index)
+    while data := fetch_movies_task():
+        data = transform_movies_task(data)
+        load_movies_task(data)

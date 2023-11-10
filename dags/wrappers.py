@@ -1,4 +1,5 @@
 import json
+import logging
 import typing as tp
 from contextlib import closing
 from datetime import datetime
@@ -10,52 +11,40 @@ from elasticsearch import Elasticsearch, helpers
 from models.genre_es import GenreES
 from models.movie_es import MovieES
 from models.person_es import PersonES
-from queries.base import BaseQuery
-
+from psycopg2.extras import DictCursor
 from settings import APP_SETTINGS, ES_DSN
 
+logger = logging.getLogger(__name__)
 
-def fetch_wrapper(query_class: BaseQuery, state_key: str):
-    @task
-    def fetch(ti: TaskInstance):
-        pg_hook = PostgresHook(
-            postgres_conn_id=APP_SETTINGS.postgres_connection_id,
-            options=APP_SETTINGS.options,
+
+def fetch_wrapper(query: str, state_key: str):
+    @task.python()
+    def fetch(ti: TaskInstance = None):
+        pg_hook = PostgresHook(postgres_conn_id=APP_SETTINGS.postgres_connection_id)
+        connection = pg_hook.get_conn()
+        cursor = connection.cursor(cursor_factory=DictCursor)
+        last_updated = ti.xcom_pull(key=state_key, include_prior_dates=True) or str(
+            datetime.min
         )
-        with closing(pg_hook.get_conn()) as conn, conn.cursor() as cursor:
-            last_updated = ti.xcom_pull(key=state_key, include_prior_dates=True) or str(
-                datetime.min
-            )
-            # TODO: logging
-            cursor.execute(query_class.query(), (last_updated,))
-            items = cursor.fetchall()
-            print(items)
-            ti.xcom_push(
-                key=state_key,
-                value=str(items[-1]["modified"]),
-            )
-            # while items := cursor.fetchmany(APP_SETTINGS.batch_size):
-            #     json_data = json.dumps([dict(x) for x in items], indent=4)
-            #     ti.xcom_push(
-            #         key=state_key,
-            #         value=str(items[-1]["modified"]),
-            #     )
-            #     yield json_data
-            return json.dumps(items)
+        cursor.execute(query, (last_updated,))
+        items = cursor.fetchall()
+        items = [dict(item) for item in items]
+        if items:
+            ti.xcom_push(key=state_key, value=str(items[-1]["modified"]))
+        return items
 
     return fetch
 
 
 def transform_wrapper(mapping: tp.Union[MovieES, GenreES, PersonES]):
-    @task
-    def transform(ti: TaskInstance):
-        json_data = ti.xcom_pull(task_ids="fetch")
-        data = json.loads(json_data)
+    @task.python()
+    def transform(data: list):
         batch = []
         for item in data:
-            movie = mapping(**item).model_dump()
-            movie["_id"] = movie["id"]
-            batch.append(movie)
+            entity = mapping(**item).model_dump()
+            entity["id"] = str(entity["id"])
+            entity["_id"] = entity["id"]
+            batch.append(entity)
         json_data = json.dumps(batch, indent=4)
         return json_data
 
@@ -63,13 +52,12 @@ def transform_wrapper(mapping: tp.Union[MovieES, GenreES, PersonES]):
 
 
 def load_wrapper(es_index: str):
-    @task
-    def load(ti: TaskInstance):
-        json_data = ti.xcom_pull(task_ids="transform")
-        if not json_data:
-            return
+    @task.python()
+    def load(json_data: str):
         data = json.loads(json_data)
-        es_dsn = f"http://{ES_DSN.host}: {ES_DSN.port}"
+        if not data:
+            return
+        es_dsn = f"http://{ES_DSN.host}:{ES_DSN.port}"
         with closing(Elasticsearch([es_dsn])) as client:
             lines, _ = helpers.bulk(
                 client=client,
@@ -77,8 +65,25 @@ def load_wrapper(es_index: str):
                 index=es_index,
                 chunk_size=APP_SETTINGS.batch_size,
             )
-
             # TODO: add logging
-            return len(data)
+            return lines
 
     return load
+
+
+def fetch_batch_wrapper(query: str, state_key: str):
+    @task
+    def fetch_generator(ti: TaskInstance = None) -> tp.Generator:
+        pg_hook = PostgresHook(postgres_conn_id=APP_SETTINGS.postgres_connection_id)
+        connection = pg_hook.get_conn()
+        cursor = connection.cursor("named_cursor")
+        last_updated = ti.xcom_pull(key=state_key, include_prior_dates=True) or str(
+            datetime.min
+        )
+        cursor.execute(query, (last_updated,))
+        while items := cursor.fetchmany(APP_SETTINGS.batch_size):
+            items = [dict(item) for item in items]
+            ti.xcom_push(key=state_key, value=str(items[-1]["modified"]))
+            yield items
+
+    return fetch_generator
