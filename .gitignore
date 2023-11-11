@@ -3,3 +3,7 @@ logs/
 dags/.idea/
 plugins/
 /config/
+
+envs/.env.etl
+envs/.env.database
+envs/.env.api
