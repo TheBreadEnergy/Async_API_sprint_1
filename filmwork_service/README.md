@@ -29,7 +29,7 @@
 <code>page_number</code>.</p> <p><code>page_size</code> - количество фильмов на 
 одной странице.</p> 
 <p><code>page_number</code> - номер запрашиваемой страницы.</p>
-<p>Сортировка возможна по полям <code>imdb_rating</code> и <code>title</code>.
+<p>Сортировка возможна по полю <code>imdb_rating</code>.
 Если указан <code>-</code> в начале поля, например <code>-imdb_rating</code>, то
 сортировка будет производиться по убыванию.</p>
 <p>Фильтрация данных возможна по следующим полям: <code>film_id</code>, <code>genre</code>, 

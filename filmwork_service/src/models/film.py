@@ -12,9 +12,17 @@ def orjson_dumps(v, *, default):
     return orjson.dumps(v, default=default).decode()
 
 
-class Person(BaseModel):
+class NameMixin(BaseModel):
     id: str
     name: str
+
+
+class Person(NameMixin):
+    pass
+
+
+class Genre(NameMixin):
+    pass
 
 
 class Film(BaseModel):
@@ -22,7 +30,7 @@ class Film(BaseModel):
     title: str
     imdb_rating: Optional[float] = None
     description: Optional[str] = None
-    genre: Optional[list[str]] = None
+    genre: Optional[list[Genre]] = []
     actors: Optional[list[Person]] = []
     writers: Optional[list[Person]] = []
     director: Optional[list[str]] = []
@@ -31,8 +39,3 @@ class Film(BaseModel):
 class Films(Film):
     page: int = (Query(ge=0, default=0),)
     size: int = Query(ge=1, le=100, default=40)
-
-    # class Config:
-    #     # Заменяем стандартную работу с json нпа более быструю
-    #     json_loads = orjson.loads
-    #     json_dumps = orjson_dumps

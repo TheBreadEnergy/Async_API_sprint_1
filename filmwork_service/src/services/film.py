@@ -47,14 +47,12 @@ class FilmService:
                 sort = sort[1:]
             else:
                 direction_sort = "asc"
-            # Для nested параметров
-            if sort == "actors" or sort == "writers":
-                sort = f"{sort}.name"
             if sort == "title":
-                sort = "raw.title"
-            body_query["sort"] = [{sort: direction_sort}]
+                body_query["sort"] = [{"title.raw": direction_sort}]
+            if sort == "imdb_rating":
+                body_query["sort"] = [{sort: direction_sort}]
         for f_item in data_filter:
-            if f_item == "actors" or f_item == "writers":
+            if f_item == "actors" or f_item == "writers" or f_item == "genre":
                 body_query["query"]["bool"]["filter"]["bool"]["must"].append(
                     {
                         "nested": {

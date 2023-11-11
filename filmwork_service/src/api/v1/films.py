@@ -2,21 +2,19 @@ from http import HTTPStatus
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.film import Person
+from models.film import Genre, Person
 from pydantic import BaseModel
 from services.film import FilmService, get_film_service
 
-# Объект router, в котором регистрируем обработчики
 router = APIRouter()
 
 
-# Модель ответа API
 class Film(BaseModel):
     id: str
     title: str
     imdb_rating: Optional[float]
     description: Optional[str]
-    genre: Optional[list[str]]
+    genre: Optional[list[Genre]]
     actors: Optional[list[Person]]
     writers: Optional[list[Person]]
     director: Optional[list[str]]
