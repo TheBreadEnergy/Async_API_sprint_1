@@ -10,7 +10,7 @@ repos:
       entry: flake8
       language: python
       types: [python]
-      exclude: (?x)^(django_admin/.* |dags/queries/.*)$
+      exclude: (?x)^(django_admin/.* |etl/queries/.*)$
 -   repo: https://github.com/timothycrosley/isort
     rev: 5.12.0
     hooks:
