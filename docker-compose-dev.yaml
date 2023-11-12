@@ -1,8 +1,8 @@
 version: '3'
 services:
   django-api:
-    build: django_admin/app
-    image: django-api:prod
+    build: django_admin
+    image: app-django-api:prod
     volumes:
       - static:/opt/app/static
     depends_on:
@@ -13,10 +13,9 @@ services:
       - "8000"
 
   proxy:
-    image: nginx:latest
+    build: nginx/
+    image: app-nginx-proxy:latest
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/config:/etc/nginx/conf.d:ro
       - static:/data/static/:ro
     depends_on:
       - django-api
@@ -24,10 +23,8 @@ services:
       - "81:80"
 
   postgres:
-    image: postgres:latest
-    volumes:
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - postgres-data:/var/lib/postgresql/data
+    build: postgres/
+    image: app-postgres
     env_file:
       - envs/.env.database
 
@@ -38,11 +35,9 @@ services:
       - redis-data:/data
 
   elastic:
-    image: elasticsearch:8.6.2
+    build: elastic/
+    image: app-elasticsearch
     restart: unless-stopped
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
     volumes:
       - elastic-data:/usr/share/elasticsearch/data
     ports:
@@ -50,7 +45,7 @@ services:
 
   etl:
     build: ./etl
-    image: etl-process:dev
+    image: app-etl-process:dev
     env_file:
       - envs/.env.etl
     depends_on:
