@@ -109,7 +109,7 @@
           "id": {
             "type": "keyword"
           },
-          "title": {
+          "name": {
             "type": "text",
             "analyzer": "ru_en"
           }

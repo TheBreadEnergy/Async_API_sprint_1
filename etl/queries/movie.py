@@ -22,7 +22,7 @@ class MovieQuery(BaseQuery):
             DISTINCT jsonb_build_object('id', person.id, 'name', person.full_name))
         FILTER (WHERE person_film.role = 'screenwriter') as writers,
         ARRAY_AGG( 
-            DISTINCT jsonb_build_object('id', genre.id, 'title', genre.name)
+            DISTINCT jsonb_build_object('id', genre.id, 'name', genre.name)
         ) as genres,
         GREATEST (film.modified, MAX(genre.modified), MAX(person.modified)) as modified
         FROM {MOVIE_TABLE} film

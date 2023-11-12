@@ -4,7 +4,7 @@ from queries.settings import GENRE_TABLE
 
 class GenreQuery(BaseQuery):
     _query = f"""
-    SELECT genre.id as id, genre.name as title, genre.description as description, genre.modified as modified
+    SELECT genre.id as id, genre.name, genre.description as description, genre.modified as modified
     FROM {GENRE_TABLE} genre
     WHERE genre.modified > %s
     GROUP BY genre.id

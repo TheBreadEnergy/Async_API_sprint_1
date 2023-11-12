@@ -8,7 +8,7 @@ class FilmParticipantES(EntityMixinES):
 
 
 class FilmGenreES(EntityMixinES):
-    title: str
+    name: str
 
 
 class MovieES(EntityMixinES):
