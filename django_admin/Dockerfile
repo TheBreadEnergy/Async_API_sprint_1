@@ -13,11 +13,11 @@ ENV PIP_ROOT_USER_ACTION=ignore
 RUN groupadd -r django && useradd -d /opt/app -r -g django django \
     && chown django:django -R /opt/app/
 
-COPY requirements.txt requirements.txt
-COPY uwsgi/uwsgi.ini uwsgi.ini
+COPY app/requirements.txt requirements.txt
+COPY app/uwsgi/uwsgi.ini uwsgi.ini
 
 RUN apt-get update && apt-get install netcat-traditional && python -m pip install --upgrade pip && pip install -r requirements.txt
-COPY . .
+COPY app/ .
 
 RUN chmod +x docker-entrypoint.sh  && mkdir /opt/app/static
 

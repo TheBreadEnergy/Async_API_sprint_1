@@ -11,7 +11,7 @@ class PersonQuery(BaseQuery):
     SELECT person.id,
     person.full_name AS name,
     person.gender AS gender,
-    ARRAY_AGG(DISTINCT jsonb_build_object('film_id', person_film.film_work_id, 'role', person_film.role)) AS film_roles,
+    COALESCE(ARRAY_AGG(DISTINCT jsonb_build_object('film_id', person_film.film_work_id, 'role', person_film.role)) FILTER (WHERE person_film.film_work_id IS NOT NULL), array[]::jsonb[]) AS film_roles,
     GREATEST (person.modified, MAX(film.modified)) as modified
     FROM {PERSON_TABLE} person
     LEFT JOIN {PERSON_MOVIE_TABLE} as person_film ON person.id = person_film.person_id

@@ -6,8 +6,8 @@ from pydantic import BaseModel
 
 
 class PersonFilmworkRoleES(BaseModel):
-    film_id: Optional[UUID]
-    role: Optional[str] = ""
+    film_id: UUID
+    role: str
 
 
 class PersonES(EntityMixinES):
