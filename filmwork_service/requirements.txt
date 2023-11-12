@@ -1,5 +1,6 @@
 redis~=4.4.2
 elasticsearch~=7.9.1
+elasticsearch[async]
 fastapi~=0.104.1
 pydantic~=2.4.2
 orjson~=3.9.10

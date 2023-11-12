@@ -1,4 +1,4 @@
-FROM python:latest as builder
+FROM python:latest
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
