@@ -21,6 +21,15 @@ services:
     env_file:
       - envs/.env.api.films
 
+  genre-person-api:
+    build: person_genre_service
+    image: app-person-api:dev
+    depends_on:
+      - redis-films
+      - elastic
+    env_file:
+      - envs/.env.api.films
+
   proxy:
     build: nginx/
     image: app-nginx-proxy:latest

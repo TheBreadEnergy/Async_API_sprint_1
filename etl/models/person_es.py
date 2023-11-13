@@ -12,5 +12,5 @@ class PersonFilmworkRoleES(BaseModel):
 
 class PersonES(EntityMixinES):
     name: str
-    gender: str
+    gender: Optional[str] = ""
     film_roles: Optional[List[PersonFilmworkRoleES]] = []
