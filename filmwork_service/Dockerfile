@@ -31,7 +31,7 @@ COPY . .
 
 RUN chmod +x docker-entrypoint.sh
 
-EXPOSE 80
+EXPOSE 8000
 
 USER fastapi
 

@@ -43,6 +43,8 @@ async def film_details(
     return film
 
 
+# Add descriptions
+# Add new method /search with the same query params
 @router.get(
     "/",
     response_model=list[Films],

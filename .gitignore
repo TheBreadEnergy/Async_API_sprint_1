@@ -6,4 +6,7 @@ plugins/
 
 envs/.env.etl
 envs/.env.database
-envs/.env.api
+envs/.env.api.films
+envs/.env.django
+envs/.env.api.genre_person
+

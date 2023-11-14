@@ -20,6 +20,8 @@ services:
       - elastic
     env_file:
       - envs/.env.api.films
+    ports:
+      - "8001:8000"
 
   genre-person-api:
     build: person_genre_service
@@ -28,7 +30,9 @@ services:
       - redis-films
       - elastic
     env_file:
-      - envs/.env.api.films
+      - envs/.env.api.genre_person
+    ports:
+      - "8002:8000"
 
   proxy:
     build: nginx/
