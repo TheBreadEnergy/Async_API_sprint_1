@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -10,7 +11,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/{person_id}",
+    "/get/{person_id}",
     response_model=Person,
     description="Вывод подробной информации о запрашиваемом персоне",
     tags=["Персоны"],
@@ -18,7 +19,7 @@ router = APIRouter()
     response_description="Информация о персоне",
 )
 async def person_details(
-        person_id: str, person_service: PersonService = Depends(get_person_service)
+        person_id: UUID, person_service: PersonService = Depends(get_person_service)
 ) -> Person:
     person = await person_service.get_by_id(person_id)
     if not person:
@@ -28,7 +29,27 @@ async def person_details(
 
 
 @router.get(
-    "/",
+    "/search",
+    response_model=list[Person],
+    description="Поиск подробной информации о запрашиваемых персонах",
+    tags=["Персоны"],
+    summary="Поиск информации о запрашиваемых персонах",
+    response_description="Информация о запрашиваемых персонах",
+)
+async def search_person(
+        query: str,
+        person_service: PersonService = Depends(get_person_service),
+        page: int = Query(ge=1, default=1),
+        size: int = Query(ge=1, le=100, default=40),
+) -> list[Person]:
+    persons = await person_service.search_person(query, page, size)
+    if not persons:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="person not found")
+    return persons
+
+
+@router.get(
+    "/list",
     response_model=list[Person],
     description="Вывод подробной информации о запрашиваемых персонах",
     tags=["Персоны"],
@@ -37,7 +58,7 @@ async def person_details(
 )
 async def list_persons(
         sort: str = Query(default='asc', regex="^(asc|desc)$"),
-        id_person: str = None,
+        id_person: UUID = None,
         page: int = Query(ge=1, default=1),
         size: int = Query(ge=1, le=100, default=40),
         person_service: PersonService = Depends(get_person_service),
