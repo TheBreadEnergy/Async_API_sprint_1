@@ -35,7 +35,7 @@ services:
       - "8002:8000"
 
   proxy:
-    build: nginx/
+    build: ./nginx/
     image: app-nginx-proxy:latest
     volumes:
       - static:/data/static/:ro

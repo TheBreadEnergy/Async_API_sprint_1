@@ -6,9 +6,8 @@ from db.redis import get_redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from elasticsearch.helpers import async_scan
 from fastapi import Depends
-from redis.asyncio import Redis
-
 from models.person import Person
+from redis.asyncio import Redis
 
 PERSON_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
@@ -30,7 +29,7 @@ class PersonService:
         return person
 
     async def get_all(
-            self, sort: str, data_filter: dict, page: int, size: int
+        self, sort: str, data_filter: dict, page: int, size: int
     ) -> Optional[list[Person]]:
         offset_min = (page - 1) * size
         offset_max = page * size
@@ -38,11 +37,12 @@ class PersonService:
         return persons[offset_min:offset_max]
 
     async def _get_persons_from_elastic(
-            self, sort: str, data_filter: dict, page: int, size: int
+        self, sort: str, data_filter: dict, page: int, size: int
     ) -> Optional[list[Person]]:
-
-        body_query = {"query": {"bool": {"filter": {"bool": {"must": []}}}},
-                      "sort": [{"name.keyword": {"order": sort}}]}
+        body_query = {
+            "query": {"bool": {"filter": {"bool": {"must": []}}}},
+            "sort": [{"name.raw": {"order": sort}}],
+        }
 
         if "id" in data_filter:
             body_query["query"]["bool"]["filter"]["bool"]["must"].append(
@@ -51,7 +51,7 @@ class PersonService:
 
         docs = []
         async for doc in async_scan(
-                client=self.elastic, query=body_query, index="persons", preserve_order=True
+            client=self.elastic, query=body_query, index="persons", preserve_order=True
         ):
             doc["_source"]["page"] = page
             doc["_source"]["size"] = size
@@ -81,7 +81,7 @@ class PersonService:
 
 @lru_cache()
 def get_person_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> PersonService:
     return PersonService(redis, elastic)

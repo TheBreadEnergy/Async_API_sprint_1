@@ -41,7 +41,7 @@ class GenreService:
     ) -> Optional[list[Genre]]:
         body_query = {
             "query": {"bool": {"filter": {"bool": {"must": []}}}},
-            "sort": [{"name.keyword": {"order": sort}}],
+            "sort": [{"name.raw": {"order": sort}}],
         }
 
         if "id" in data_filter:
