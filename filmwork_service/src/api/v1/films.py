@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from models.film import Genre, Person
@@ -9,18 +9,21 @@ from services.film import FilmService, get_film_service
 router = APIRouter()
 
 
-class Film(BaseModel):
-    id: str
+class MixinFilms(BaseModel):
+    id: UUID
     title: str
-    imdb_rating: Optional[float]
-    description: Optional[str]
-    genres: Optional[list[Genre]]
-    actors: Optional[list[Person]]
-    writers: Optional[list[Person]]
-    director: Optional[list[str]]
+    imdb_rating: float | None
 
 
-class Films(Film):
+class Film(MixinFilms):
+    description: str | None
+    genres: list[Genre]
+    actors: list[Person]
+    writers: list[Person]
+    director: list[str]
+
+
+class Films(MixinFilms):
     page: int = (Query(ge=0, default=0),)
     size: int = Query(ge=1, le=100, default=40)
 
@@ -34,13 +37,35 @@ class Films(Film):
     response_description="Информация о кинопроизведении",
 )
 async def film_details(
-    film_id: str, film_service: FilmService = Depends(get_film_service)
+    film_id: UUID, film_service: FilmService = Depends(get_film_service)
 ) -> Film:
     film = await film_service.get_by_id(film_id)
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")
 
     return film
+
+
+@router.get(
+    "/search/",
+    response_model=list[Films],
+    description="Поиск подробной информации о кинопроизведениях",
+    tags=["Фильмы"],
+    summary="Поиск информации о кинопроизведениях",
+    response_description="Информация о кинопроизведении",
+)
+async def search_films(
+    id_film: UUID = None,
+    title: str = None,
+    film_service: FilmService = Depends(get_film_service),
+    page: int = Query(ge=1, default=1),
+    size: int = Query(ge=1, le=100, default=40),
+) -> list[Films]:
+    films = await film_service.search_film(id_film, title, page, size)
+    if not films:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="films not found")
+    print(films)
+    return films
 
 
 @router.get(
@@ -53,7 +78,7 @@ async def film_details(
 )
 async def list_films(
     sort=None,
-    id_film: str = None,
+    id_film: UUID = None,
     genre: str = None,
     actor_id: str = None,
     writer_id: str = None,
@@ -74,4 +99,5 @@ async def list_films(
     films = await film_service.get_all(sort, data_filter, page, size)
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="films not found")
+
     return films

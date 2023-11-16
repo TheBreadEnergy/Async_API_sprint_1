@@ -1,19 +1,14 @@
 from typing import Optional
+from uuid import UUID
 
-import orjson
 from fastapi import Query
 
 # Используем pydantic для упрощения при перегонке данных из json в объекты
 from pydantic import BaseModel
 
 
-def orjson_dumps(v, *, default):
-    # orjson.dumps возвращает bytes, а pydantic требует unicode, поэтому декорируем
-    return orjson.dumps(v, default=default).decode()
-
-
 class NameMixin(BaseModel):
-    id: str
+    id: UUID
     name: str
 
 
@@ -26,10 +21,10 @@ class Genre(NameMixin):
 
 
 class Film(BaseModel):
-    id: str
+    id: UUID
     title: str
-    imdb_rating: Optional[float] = None
-    description: Optional[str] = None
+    imdb_rating: Optional[float] | None
+    description: Optional[str] | None = None
     genres: Optional[list[Genre]] = []
     actors: Optional[list[Person]] = []
     writers: Optional[list[Person]] = []
