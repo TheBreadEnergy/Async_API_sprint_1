@@ -60,18 +60,16 @@ class PersonService:
         return docs
 
     async def search_person(
-            self, query: str, page: int, size: int
+        self, query: str, page: int, size: int
     ) -> Optional[list[Person]]:
         docs = []
         offset_min = (page - 1) * size
         offset_max = page * size
 
-        body_query = {
-            "query": {"match_phrase_prefix": {"name": {"query": query}}}
-        }
+        body_query = {"query": {"match_phrase_prefix": {"name": {"query": query}}}}
 
         async for doc in async_scan(
-                client=self.elastic, query=body_query, index="persons"
+            client=self.elastic, query=body_query, index="persons"
         ):
             doc["_source"]["page"] = page
             doc["_source"]["size"] = size
@@ -96,7 +94,9 @@ class PersonService:
         return person
 
     async def _put_person_to_cache(self, person: Person):
-        await self.redis.set(str(person.id), person.json(), PERSON_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(
+            str(person.id), person.json(), PERSON_CACHE_EXPIRE_IN_SECONDS
+        )
 
 
 @lru_cache()

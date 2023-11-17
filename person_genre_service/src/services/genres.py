@@ -38,18 +38,16 @@ class GenreService:
         return genres[offset_min:offset_max]
 
     async def search_genre(
-            self, query: str, page: int, size: int
+        self, query: str, page: int, size: int
     ) -> Optional[list[Genre]]:
         docs = []
         offset_min = (page - 1) * size
         offset_max = page * size
 
-        body_query = {
-            "query": {"match_phrase_prefix": {"name": {"query": query}}}
-        }
+        body_query = {"query": {"match_phrase_prefix": {"name": {"query": query}}}}
 
         async for doc in async_scan(
-                client=self.elastic, query=body_query, index="genres"
+            client=self.elastic, query=body_query, index="genres"
         ):
             doc["_source"]["page"] = page
             doc["_source"]["size"] = size
