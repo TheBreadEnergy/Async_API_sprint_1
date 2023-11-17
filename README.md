@@ -130,7 +130,7 @@
             Подробнее о сервисе можно узнать <a href="./filmwork_service"> здесь. </a>
         </p>
         <p>
-            <b>REST сервис для жанров и персоналиев </b> доступен без swagger, для REST по порту <b>81</b> (по умолчанию) по путям <code> /api/genre </code> и  <code> /api/v1/person/ </code> для api и <code> api/persons-genres </code> для swagger.
+            <b>REST сервис для жанров и персоналиев </b> доступен без swagger, для REST по порту <b>81</b> (по умолчанию) по путям <code> /api/v1/genre </code> и  <code> /api/v1/person/ </code> для api и <code> api/persons-genres </code> для swagger.
             Подробнее о сервисе можно узнать <a href="./person_genre_service"> здесь. </a>
         </p>  
         <p>
