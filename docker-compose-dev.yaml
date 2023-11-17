@@ -34,6 +34,7 @@ services:
     ports:
       - "8002:8000"
 
+
   proxy:
     build: nginx/
     image: app-nginx-proxy:latest
