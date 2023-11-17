@@ -107,34 +107,34 @@
         <code> git clone git@github.com:ProTupfe4/Async_API_sprint_1.git </code>
     </li>
     <li>
-        Необходимо поместить необходимые env файлы в папку <code>envs/</code> Примеры рабочих env файлов представлены
+        Необходимо поместить необходимые env файлы в папку <code>envs/</code> Примеры необходимых рабочих env файлов представлены
         в папке <code>envs/</code> c расширением <code>.example</code>
     </li>
     <li>
-        Для запуска сервисов можно прописать либо <code>make run-dev</code> либо 
-        <code>docker-compose -f docker-compose-dev.yaml up </code>. 
+        Для запуска сервисов можно прописать либо <code>make run-dev</code> (для этого требуется установленный <b>Make</b>) либо 
+        <code>docker-compose -f docker-compose-dev.yaml up. </code>
         <p>
-            <b>Сервис django-admin </b> будет доступен по порту <b> 81 </b> (по умолчанию). В данном сервисе есть две основные ручки:
+            <b>Сервис django-admin</b> будет доступен по порту <b> 81 </b> (по умолчанию). В данном сервисе есть две основные ручки:
             <ol>
                 <li> 
                     <code>/admin</code> - открывается доступ к интерфейсу администратора. Для создания суперпользователя
                     можно воспользоваться командой <code>make admin-dev</code>. Создастся суперпользователь с логином my_admin и паролем PpAaSs!123
                 </li>
                 <li>
-                    <code> /api/v1/movies </code> - для извлечения данных из базы данных postgres
+                    <code>/api/v1/movies</code> - для извлечения данных из базы данных postgres
                 </li>
             </ol>
         </p>
         <p>
-            <b>REST сервис для фильмов </b> доступен без swagger, для REST по порту <b>81</b> (по умолчанию) по пути <code> /api/v1/films </code> для api и <code> api/films </code> для swagger.
+            <b>REST сервис для фильмов </b> доступен без swagger, для REST по порту <b>81</b> (по умолчанию) по пути <code>/api/v1/films</code> для api и <code>api/films</code> для swagger.
             Подробнее о сервисе можно узнать <a href="./filmwork_service"> здесь. </a>
         </p>
         <p>
-            <b>REST сервис для жанров и персоналиев </b> доступен без swagger, для REST по порту <b>81</b> (по умолчанию) по путям <code> /api/v1/genre </code> и  <code> /api/v1/person/ </code> для api и <code> api/persons-genres </code> для swagger.
+            <b>REST сервис для жанров и персоналиев </b> доступен без swagger, для REST по порту <b>81</b> (по умолчанию) по путям <code>/api/v1/genre</code> и  <code>/api/v1/person/</code> для api и <code>api/persons-genres</code> для swagger.
             Подробнее о сервисе можно узнать <a href="./person_genre_service"> здесь. </a>
         </p>  
         <p>
-            Сервис Elasticsearch для взаимодействия с внешним миром прокинут по порту <b>9200 </b>
+            Сервис Elasticsearch для взаимодействия с внешним миром прокинут по порту <b>9200</b>
         </p>
     </li>
     <li>
