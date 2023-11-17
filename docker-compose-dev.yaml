@@ -20,8 +20,15 @@ services:
       - elastic
     env_file:
       - envs/.env.api.films
-    ports:
-      - "8001:8000"
+    expose:
+      - "8000"
+
+  redis-films:
+    image: redis:latest
+    restart: unless-stopped
+    volumes:
+      - films-cache:/data
+
 
   genre-person-api:
     build: person_genre_service
@@ -31,8 +38,14 @@ services:
       - elastic
     env_file:
       - envs/.env.api.genre_person
-    ports:
-      - "8002:8000"
+    expose:
+      - "8000"
+
+  redis-pg:
+    image: redis:latest
+    restart: unless-stopped
+    volumes:
+      - pg-cache:/data
 
 
   proxy:
@@ -52,13 +65,6 @@ services:
       - envs/.env.database
     volumes:
       - postgres-data:/var/lib/postgresql/data
-
-  redis-films:
-    image: redis:latest
-    restart: unless-stopped
-    volumes:
-      - films-cache:/data
-
 
   redis:
     image: redis:latest
@@ -93,4 +99,5 @@ volumes:
   redis-data:
   elastic-data:
   films-cache:
+  pg-cache:
 
