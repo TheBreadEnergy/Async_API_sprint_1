@@ -65,8 +65,7 @@ async def search_films(
 ) -> list[Films]:
     films = await film_service.search_film(id_film, title, page, size)
     if not films:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="films not found")
-    print(films)
+        return list()
     return films
 
 
@@ -100,6 +99,5 @@ async def list_films(
 
     films = await film_service.get_all(sort, data_filter, page, size)
     if not films:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="films not found")
-
+        return list()
     return films

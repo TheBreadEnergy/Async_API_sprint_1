@@ -36,7 +36,7 @@ services:
 
 
   proxy:
-    build: nginx/
+    build: ./nginx/
     image: app-nginx-proxy:latest
     volumes:
       - static:/data/static/:ro

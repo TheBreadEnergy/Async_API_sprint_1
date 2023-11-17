@@ -1,5 +1,6 @@
 from functools import lru_cache
 from typing import Optional
+from uuid import UUID
 
 from db.elastic import get_elastic
 from db.redis import get_redis
@@ -17,7 +18,7 @@ class GenreService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_by_id(self, genre_id: str) -> Optional[Genre]:
+    async def get_by_id(self, genre_id: UUID) -> Optional[Genre]:
         genre = await self._genre_from_cache(genre_id)
 
         if not genre:
@@ -36,12 +37,29 @@ class GenreService:
         genres = await self._get_genres_from_elastic(sort, data_filter, page, size)
         return genres[offset_min:offset_max]
 
+    async def search_genre(
+        self, query: str, page: int, size: int
+    ) -> Optional[list[Genre]]:
+        docs = []
+        offset_min = (page - 1) * size
+        offset_max = page * size
+
+        body_query = {"query": {"match_phrase_prefix": {"name": {"query": query}}}}
+
+        async for doc in async_scan(
+            client=self.elastic, query=body_query, index="genres"
+        ):
+            doc["_source"]["page"] = page
+            doc["_source"]["size"] = size
+            docs.append(Genre(**doc["_source"]))
+        return docs[offset_min:offset_max]
+
     async def _get_genres_from_elastic(
         self, sort: str, data_filter: dict, page: int, size: int
     ) -> Optional[list[Genre]]:
         body_query = {
             "query": {"bool": {"filter": {"bool": {"must": []}}}},
-            "sort": [{"name.keyword": {"order": sort}}],
+            "sort": [{"name.raw": {"order": sort}}],
         }
 
         if "id" in data_filter:
@@ -58,17 +76,17 @@ class GenreService:
             docs.append(Genre(**doc["_source"]))
         return docs
 
-    async def _get_genre_from_elastic(self, genre_id: str) -> Optional[Genre]:
+    async def _get_genre_from_elastic(self, genre_id: UUID) -> Optional[Genre]:
         try:
-            doc = await self.elastic.get(index="genres", id=genre_id)
+            doc = await self.elastic.get(index="genres", id=str(genre_id))
         except NotFoundError:
             return None
 
         return Genre(**doc["_source"])
 
-    async def _genre_from_cache(self, genre_id: str) -> Optional[Genre]:
+    async def _genre_from_cache(self, genre_id: UUID) -> Optional[Genre]:
         # Пытаемся получить данные жанра из кеша, используя команду get
-        data_from_cache = await self.redis.get(genre_id)
+        data_from_cache = await self.redis.get(str(genre_id))
         if not data_from_cache:
             return None
 
@@ -76,7 +94,7 @@ class GenreService:
         return genre
 
     async def _put_genre_to_cache(self, genre: Genre):
-        await self.redis.set(genre.id, genre.json(), GENRE_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(str(genre.id), genre.json(), GENRE_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()
