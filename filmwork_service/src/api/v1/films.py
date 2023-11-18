@@ -2,7 +2,8 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.film import Genre, Person
+from models.genre import Genre
+from models.person import Person
 from pydantic import BaseModel
 from services.film import FilmService, get_film_service
 

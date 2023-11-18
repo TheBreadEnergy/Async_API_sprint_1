@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Optional
 from uuid import UUID
 
 from db.elastic import get_elastic
@@ -18,7 +17,7 @@ class PersonService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_by_id(self, person_id: UUID) -> Optional[Person]:
+    async def get_by_id(self, person_id: UUID) -> Person | None:
         person = await self._person_from_cache(person_id)
 
         if not person:
@@ -31,7 +30,7 @@ class PersonService:
 
     async def get_all(
         self, sort: str, data_filter: dict, page: int, size: int
-    ) -> Optional[list[Person]]:
+    ) -> list[Person] | None:
         offset_min = (page - 1) * size
         offset_max = page * size
         persons = await self._get_persons_from_elastic(sort, data_filter, page, size)
@@ -39,7 +38,7 @@ class PersonService:
 
     async def _get_persons_from_elastic(
         self, sort: str, data_filter: dict, page: int, size: int
-    ) -> Optional[list[Person]]:
+    ) -> list[Person] | None:
         body_query = {
             "query": {"bool": {"filter": {"bool": {"must": []}}}},
             "sort": [{"name.raw": {"order": sort}}],
@@ -61,7 +60,7 @@ class PersonService:
 
     async def search_person(
         self, query: str, page: int, size: int
-    ) -> Optional[list[Person]]:
+    ) -> list[Person] | None:
         docs = []
         offset_min = (page - 1) * size
         offset_max = page * size
@@ -76,7 +75,7 @@ class PersonService:
             docs.append(Person(**doc["_source"]))
         return docs[offset_min:offset_max]
 
-    async def _get_person_from_elastic(self, person_id: UUID) -> Optional[Person]:
+    async def _get_person_from_elastic(self, person_id: UUID) -> Person | None:
         try:
             doc = await self.elastic.get(index="persons", id=str(person_id))
         except NotFoundError:
@@ -84,9 +83,9 @@ class PersonService:
 
         return Person(**doc["_source"])
 
-    async def _person_from_cache(self, person_id: str) -> Optional[Person]:
+    async def _person_from_cache(self, person_id: str) -> Person | None:
         # Пытаемся получить данные персоны из кеша, используя команду get
-        data_from_cache = await self.redis.get(str(person_id))
+        data_from_cache = await self.redis.get(f"person_{person_id}")
         if not data_from_cache:
             return None
 
@@ -95,7 +94,7 @@ class PersonService:
 
     async def _put_person_to_cache(self, person: Person):
         await self.redis.set(
-            str(person.id), person.json(), PERSON_CACHE_EXPIRE_IN_SECONDS
+            f"person_{person.id}", person.json(), PERSON_CACHE_EXPIRE_IN_SECONDS
         )
 
 
