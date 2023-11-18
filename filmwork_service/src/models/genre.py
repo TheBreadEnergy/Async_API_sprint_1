@@ -7,4 +7,4 @@ from pydantic import BaseModel
 class Genre(BaseModel):
     id: UUID
     name: str
-    description: Optional[str] = None
+    description: str | None = None

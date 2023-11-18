@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from api.v1 import films, genres, persons
-from core import config
+from core.config import settings
 from core.logger import LOGGING
 from db import elastic, redis
 from elasticsearch import AsyncElasticsearch
@@ -13,10 +13,10 @@ from redis.asyncio import Redis
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    redis.redis = Redis(host=config.REDIS_HOST, port=config.REDIS_PORT)
+async def lifespan(_: FastAPI):
+    redis.redis = Redis(host=settings.redis_host, port=settings.redis_port)
     elastic.es = AsyncElasticsearch(
-        hosts=[f"{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"]
+        hosts=[f"{settings.elastic_host}:{settings.elastic_port}"]
     )
     yield
     await redis.redis.close()
@@ -24,12 +24,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title=config.PROJECT_NAME,
-    description=config.DESCRIPTION,
+    title=settings.project_name,
+    description=settings.description,
     docs_url="/api/films/openapi",
     openapi_url="/api/films/openapi.json",
     default_response_class=ORJSONResponse,
-    version=config.VERSION,
+    version=settings.version,
     lifespan=lifespan,
 )
 

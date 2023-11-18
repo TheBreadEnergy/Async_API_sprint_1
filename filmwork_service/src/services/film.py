@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Optional
 from uuid import UUID
 
 from db.elastic import get_elastic
@@ -18,7 +17,7 @@ class FilmService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_by_id(self, film_id: UUID) -> Optional[Film]:
+    async def get_by_id(self, film_id: UUID) -> Film | None:
         film = await self._film_from_cache(film_id)
         if not film:
             film = await self._get_film_from_elastic(film_id)
@@ -29,7 +28,7 @@ class FilmService:
 
     async def get_all(
         self, sort: str, data_filter, page, size
-    ) -> Optional[list[Films]]:
+    ) -> list[Films] | None:
         offset_min = (page - 1) * size
         offset_max = page * size
         films = await self._get_films_from_elastic(data_filter, sort, page, size)
@@ -37,7 +36,7 @@ class FilmService:
 
     async def search_film(
         self, id_film: UUID, title: str, page, size
-    ) -> Optional[list[Films]]:
+    ) -> list[Films] | None:
         docs = []
         offset_min = (page - 1) * size
         offset_max = page * size
@@ -46,8 +45,7 @@ class FilmService:
             if film:
                 docs.append(Films(**film.__dict__, size=size, page=page))
                 return docs
-            else:
-                return []
+            return []
         if title:
             body_query = {
                 "query": {"match": {"title": {"query": title, "operator": "and"}}}
@@ -65,7 +63,7 @@ class FilmService:
 
     async def _get_films_from_elastic(
         self, data_filter, sort, page, size
-    ) -> Optional[list[Films]]:
+    ) -> list[Films] | None:
         body_query = {"query": {"bool": {"filter": {"bool": {"must": []}}}}}
         if sort:
             if sort.startswith("-"):
@@ -100,7 +98,7 @@ class FilmService:
             docs.append(Films(**doc["_source"]))
         return docs
 
-    async def _get_film_from_elastic(self, film_id: UUID) -> Optional[Film]:
+    async def _get_film_from_elastic(self, film_id: UUID) -> Film | None:
         try:
             doc = await self.elastic.get(index="movies", id=str(film_id))
         except NotFoundError:
@@ -108,9 +106,9 @@ class FilmService:
 
         return Film(**doc["_source"])
 
-    async def _film_from_cache(self, film_id: UUID) -> Optional[Film]:
+    async def _film_from_cache(self, film_id: UUID) -> Film | None:
         # Пытаемся получить данные о фильме из кеша, используя команду get
-        data_from_cache = await self.redis.get(str(film_id))
+        data_from_cache = await self.redis.get(f"film_{film_id}")
         if not data_from_cache:
             return None
 
@@ -118,7 +116,7 @@ class FilmService:
         return film
 
     async def _put_film_to_cache(self, film: Film):
-        await self.redis.set(str(film.id), film.json(), FILM_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(f"film_{film.id}", film.json(), FILM_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()
