@@ -2,10 +2,10 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.genre import Genre
-from models.person import Person
 from pydantic import BaseModel
-from services.film import FilmService, get_film_service
+from src.models.genre import Genre
+from src.models.person import Person
+from src.services.film import FilmService, get_film_service
 
 router = APIRouter()
 
@@ -19,9 +19,9 @@ class MixinFilms(BaseModel):
 class Film(MixinFilms):
     description: str | None
     genres: list[Genre]
-    actors: list[Person]
-    writers: list[Person]
-    director: list[str]
+    actors: list[Person] | None = []
+    writers: list[Person] | None = []
+    director: list[str] | None = []
 
 
 class Films(MixinFilms):
@@ -43,7 +43,6 @@ async def film_details(
     film = await film_service.get_by_id(film_id)
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")
-
     return film
 
 

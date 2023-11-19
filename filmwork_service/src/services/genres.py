@@ -1,13 +1,13 @@
 from functools import lru_cache
 from uuid import UUID
 
-from db.elastic import get_elastic
-from db.redis import get_redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from elasticsearch.helpers import async_scan
 from fastapi import Depends
-from models.genre import Genre
 from redis.asyncio import Redis
+from src.db.elastic import get_elastic
+from src.db.redis import get_redis
+from src.models.genre import Genre
 
 GENRE_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
@@ -93,7 +93,9 @@ class GenreService:
         return genre
 
     async def _put_genre_to_cache(self, genre: Genre):
-        await self.redis.set(f"genre_{genre.id}", genre.json(), GENRE_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(
+            f"genre_{genre.id}", genre.json(), GENRE_CACHE_EXPIRE_IN_SECONDS
+        )
 
 
 @lru_cache()

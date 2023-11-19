@@ -11,19 +11,19 @@ from queries.settings import (
 class MovieQuery(BaseQuery):
     _query = f"""
         SELECT film.id, film.rating as imdb_rating, film.title, film.description,
-        ARRAY_AGG(DISTINCT genre.name) as genre,
-        ARRAY_AGG(DISTINCT person.full_name) FILTER (WHERE person_film.role = 'director') as director,
-        ARRAY_AGG(DISTINCT person.full_name) FILTER (WHERE person_film.role = 'actor') as actors_names,
-        ARRAY_AGG(DISTINCT person.full_name) FILTER (WHERE person_film.role = 'screenwriter') as writers_names,
-        ARRAY_AGG(
+        COALESCE(ARRAY_AGG(DISTINCT genre.name) FILTER ( WHERE genre IS NOT NULL ), array[]::varchar[]) as genre,
+        COALESCE(ARRAY_AGG(DISTINCT person.full_name) FILTER (WHERE person_film.role = 'director'), array[]::varchar[]) as director,
+        COALESCE(ARRAY_AGG(DISTINCT person.full_name) FILTER (WHERE person_film.role = 'actor'), array[]::varchar[]) as actors_names,
+        COALESCE(ARRAY_AGG(DISTINCT person.full_name) FILTER (WHERE person_film.role = 'screenwriter'), array[]::varchar[]) as writers_names,
+        COALESCE(ARRAY_AGG(
             DISTINCT jsonb_build_object('id', person.id, 'name', person.full_name))
-        FILTER (WHERE person_film.role = 'actor') as actors,
-        ARRAY_AGG(
+        FILTER (WHERE person_film.role = 'actor'), array[]::jsonb[]) as actors,
+        COALESCE(ARRAY_AGG(
             DISTINCT jsonb_build_object('id', person.id, 'name', person.full_name))
-        FILTER (WHERE person_film.role = 'screenwriter') as writers,
-        ARRAY_AGG( 
+        FILTER (WHERE person_film.role = 'screenwriter'), array[]::jsonb[]) as writers,
+        COALESCE(ARRAY_AGG( 
             DISTINCT jsonb_build_object('id', genre.id, 'name', genre.name)
-        ) as genres,
+        ) FILTER ( WHERE genre IS NOT NULL ), array[]::jsonb[]) as genres,
         GREATEST (film.modified, MAX(genre.modified), MAX(person.modified)) as modified
         FROM {MOVIE_TABLE} film
         LEFT JOIN {GENRE_MOVIE_TABLE} as genre_film ON genre_film.film_work_id = film.id

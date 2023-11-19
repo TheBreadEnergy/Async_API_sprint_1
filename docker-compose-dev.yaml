@@ -30,24 +30,6 @@ services:
       - films-cache:/data
 
 
-  genre-person-api:
-    build: person_genre_service
-    image: app-person-api:dev
-    depends_on:
-      - redis-films
-      - elastic
-    env_file:
-      - envs/.env.api.genre_person
-    expose:
-      - "8000"
-
-  redis-pg:
-    image: redis:latest
-    restart: unless-stopped
-    volumes:
-      - pg-cache:/data
-
-
   proxy:
     build: ./nginx/
     image: app-nginx-proxy:latest
