@@ -1,13 +1,13 @@
 from functools import lru_cache
 from uuid import UUID
 
-from db.elastic import get_elastic
-from db.redis import get_redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from elasticsearch.helpers import async_scan
 from fastapi import Depends
-from models.film import Film, Films
 from redis.asyncio import Redis
+from src.db.elastic import get_elastic
+from src.db.redis import get_redis
+from src.models.film import Film, Films
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
@@ -26,9 +26,7 @@ class FilmService:
             await self._put_film_to_cache(film)
         return film
 
-    async def get_all(
-        self, sort: str, data_filter, page, size
-    ) -> list[Films] | None:
+    async def get_all(self, sort: str, data_filter, page, size) -> list[Films] | None:
         offset_min = (page - 1) * size
         offset_max = page * size
         films = await self._get_films_from_elastic(data_filter, sort, page, size)
@@ -116,7 +114,9 @@ class FilmService:
         return film
 
     async def _put_film_to_cache(self, film: Film):
-        await self.redis.set(f"film_{film.id}", film.json(), FILM_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(
+            f"film_{film.id}", film.json(), FILM_CACHE_EXPIRE_IN_SECONDS
+        )
 
 
 @lru_cache()

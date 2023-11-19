@@ -66,7 +66,6 @@
     │   ├── Dockerfile  
     ├── envs                                    # Папка в которой хранятся примеры env файлов, необходимых для развертывания приложения
     │   ├── .env.api.films.example              # Пример env файла для сервиса фильмов.
-    │   ├── .env.api.genre_person.example       # Пример env файла для сервиса жанров и персоналий.
     │   ├── .env.api.database.example           # Пример env файла для сервиса баз данных  postgres.
     │   ├── .env.api.django.example             # Пример env файла для сервиса администрирования.
     │   ├── .env.api.etl.example                # Пример env файла для сервиса ETL.
@@ -80,13 +79,7 @@
     │   ├── Dockerfile
     ├── nginx                                   # Reverse Proxy nginx. Мы собираем свой образ на базе nginx:latest docker образа
     │   ├── config/                             # Папка содержащая конфигурационные файлы cервисов nginx  
-    │   ├── Dockerfile 
-    ├── person_genre_service                    # REST сервис для получения сведений о жанрах и персоналиях, с возможностью поиска, фильтрации и пагинации.
-    │   ├── src/                                # Исходный код сервиса
-    │   ├── tests/                              # Unit тесты
-    │   ├── docker-entrypoint.sh                # скрипт для запуска контейнера
-    │   ├── requirements.txt
-    │   ├── Dockerfile  
+    │   ├── Dockerfile
     ├── postgres                                # Сервис базы данных Postgres. Мы собираем свой образ на базе postgres:latest докер образа
     │   ├── Dockerfile 
     │   ├── init.sql                            # Скрипт инициализации базы данных.
@@ -126,13 +119,9 @@
             </ol>
         </p>
         <p>
-            <b>REST сервис для фильмов </b> доступен без swagger, для REST по порту <b>81</b> (по умолчанию) по пути <code>/api/v1/films</code> для api и <code>api/films</code> для swagger.
+            <b>REST сервис для фильмов </b> доступен без swagger, для REST по порту <b>81</b> (по умолчанию) по путям <code>/api/v1/films</code> для получения сведений о фильмах, <code>/api/v1/genres</code> для получения сведений о жанрах, <code>/api/v1/persons</code> для получения сведений о персоналиях и <code>api/films</code> для swagger.
             Подробнее о сервисе можно узнать <a href="./filmwork_service"> здесь. </a>
         </p>
-        <p>
-            <b>REST сервис для жанров и персоналиев </b> доступен без swagger, для REST по порту <b>81</b> (по умолчанию) по путям <code>/api/v1/genre</code> и  <code>/api/v1/person/</code> для api и <code>api/persons-genres</code> для swagger.
-            Подробнее о сервисе можно узнать <a href="./person_genre_service"> здесь. </a>
-        </p>  
         <p>
             Сервис Elasticsearch для взаимодействия с внешним миром прокинут по порту <b>9200</b>
         </p>

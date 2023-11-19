@@ -14,7 +14,7 @@ class FilmGenreES(EntityMixinES):
 class MovieES(EntityMixinES):
     title: str
     imdb_rating: Optional[float] = None
-    genre: Optional[List[str]] = None
+    genre: Optional[List[str]] = []
     description: Optional[str] = None
     director: Optional[List[str]] = []
     actors_names: Optional[List[str]] = []

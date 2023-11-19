@@ -1,10 +1,9 @@
 from uuid import UUID
 
 from fastapi import Query
-from models.genre import Genre
-from models.person import Person
-
 from pydantic import BaseModel
+from src.models.genre import Genre
+from src.models.person import Person
 
 
 class Film(BaseModel):

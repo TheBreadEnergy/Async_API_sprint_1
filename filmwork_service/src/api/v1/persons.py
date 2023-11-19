@@ -2,8 +2,8 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.person import Person
-from services.persons import PersonService, get_person_service
+from src.models.person import Person
+from src.services.persons import PersonService, get_person_service
 
 router = APIRouter()
 
